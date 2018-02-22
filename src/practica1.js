@@ -23,14 +23,14 @@ MemoryGame.prototype.initGame = function() {
 }
 
 MemoryGame.prototype.draw = function (){
-	game.gs.drawMessage(game.gameMessage);
+	this.gs.drawMessage(this.gameMessage);
 	for (i = 0; i < game.cards.length; i++) { 
-		game.cards[i].draw(game.gs, i);
+		this.cards[i].draw(this.gs, i);
 	}
 }
 
 MemoryGame.prototype.loop = function (){
-	setInterval(this.draw, 16);
+	setInterval(this.draw.bind(this), 16);
 }
 
 MemoryGame.prototype.onClick = function (cardId) { 
@@ -53,7 +53,7 @@ MemoryGame.prototype.onClick = function (cardId) {
 			this.checkGameState();
 		}else{ // volteamos ambas cartas estableciendo un lock sobre el juego
 			this.click = true;
-			this.resetCards(this, card, 1000);
+			this.resetCards(card, 1000);
 		}
 	}	
 }
@@ -82,14 +82,14 @@ MemoryGame.prototype.checkGameState = function(){
 	}else this.gameMessage = 'Match!';
 }
 
-MemoryGame.prototype.resetCards = function(obj, card, time){
-	obj.gameMessage = 'Fail!!';
+MemoryGame.prototype.resetCards = function(card, time){
+	this.gameMessage = 'Fail!!';
 	setTimeout(function(){
 		card.flip();
-		obj.lastCard.flip();
-		obj.lastCard = null;
-		obj.click = false;
-	}, time);
+		this.lastCard.flip();
+		this.lastCard = null;
+		this.click = false;
+	}.bind(this), time);
 }
 
 /**
