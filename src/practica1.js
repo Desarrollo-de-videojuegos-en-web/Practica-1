@@ -6,7 +6,7 @@
 var MemoryGame = MemoryGame || {};
 
 /**
- * Constructora de MemoryGame
+ * Constructora del tablero de juego. Recibe como parámetro el graphic server que gestiona el juego.
  */
 MemoryGame = function(gs) {
 	this.cards = [];
@@ -17,11 +17,17 @@ MemoryGame = function(gs) {
 	this.lastCard = null;
 };
 
+/**
+ * Inicializa el juego. Para ello genera y 'randomiza' el tablero y comienza el bucle del mismo.
+ */
 MemoryGame.prototype.initGame = function() {
 	this.randomizeCards();
 	this.loop();
 }
 
+/**
+ * Pinta las cartas del tablero.
+ */
 MemoryGame.prototype.draw = function (){
 	game.gs.drawMessage(game.gameMessage);
 	for (i = 0; i < game.cards.length; i++) { 
@@ -29,10 +35,17 @@ MemoryGame.prototype.draw = function (){
 	}
 }
 
+/**
+ * Bucle de juego. Llama a draw() con setInterval para que se ejecute cada cierto tiempo.
+ */
 MemoryGame.prototype.loop = function (){
 	setInterval(this.draw, 16);
 }
 
+/**
+ * Gestiona las pulsaciones del ratón sobre una carta.
+ * @param {int} cardId Posición del tablero que ocupa la carta seleccionada
+ */
 MemoryGame.prototype.onClick = function (cardId) { 
 	var card = this.cards[cardId];
 
@@ -41,7 +54,7 @@ MemoryGame.prototype.onClick = function (cardId) {
 	
 	card.flip();
 	
-	if (this.lastCard == null){ // primera carta seleccionada
+	if (this.lastCard == null){ // primera carta seleccionada, la guardamos y salimos
 		this.lastCard = card;
 		return;
 	}else{ // segunda carta seleccionada; comprobamos si son iguales, en otro caso las volteamos
@@ -58,6 +71,11 @@ MemoryGame.prototype.onClick = function (cardId) {
 	}	
 }
 
+/**
+ * Genera un array de cartas en base a una lista con el nombre de sus sprites y las desordena.
+ * El bucle para desordenarlas recorre el array desde el final hacia delante e intercambia la carta i-ésima con 
+ * la j-ésima siendo j<i.
+ */
 MemoryGame.prototype.randomizeCards = function(){
 	var cardSprites = ['8-ball', 'potato', 'dinosaur', 'kronos', 'rocket', 'unicorn', 'guy', 'zeppelin', 
 						'8-ball', 'potato', 'dinosaur', 'kronos', 'rocket', 'unicorn', 'guy', 'zeppelin']
@@ -75,6 +93,10 @@ MemoryGame.prototype.randomizeCards = function(){
 
 }
 
+/**
+ * Comprueba si el juego ha terminado. Si se han volteado 8 parejas (16 cartas) el juego termina, en otro caso
+ * se muestra un mensaje match.
+ */
 MemoryGame.prototype.checkGameState = function(){
 	if (this.pairsFound == 8){
 		this.gameMessage = 'You win!!!';
@@ -82,6 +104,12 @@ MemoryGame.prototype.checkGameState = function(){
 	}else this.gameMessage = 'Match!';
 }
 
+/**
+ * Voltea las dos últimas cartas seleccionadas si no ha habido match.
+ * @param {MemoryGame} obj Sesión de juego que contiene el tablero y la carta volteada en el turno anterior
+ * @param {MemoryGameCard} card Carta volteada en el último movimiento
+ * @param {int} time Tiempo en ms a esperar para voltear las cartas
+ */
 MemoryGame.prototype.resetCards = function(obj, card, time){
 	obj.gameMessage = 'Fail!!';
 	setTimeout(function(){
@@ -103,19 +131,34 @@ MemoryGameCard = function(id) { // states: down, up, find
 	this.state = 'down';
 };
 
+/**
+ * Voltea la carta seleccionada cambiando el estado de la misma. Los estados pueden ser up y down.
+ */
 MemoryGameCard.prototype.flip = function() {
 	if (this.state == 'up') this.state = 'down';
 	else if (this.state == 'down') this.state = 'up';
 }
 
+/**
+ * Marca una carta como found.
+ */
 MemoryGameCard.prototype.found = function() {
 	this.state = 'found';
 }
 
+/**
+ * Determina si dos cartas son iguales comparando su sprite.
+ * @param {MemoryGameCard} otherCard Carta con la comparar
+ */
 MemoryGameCard.prototype.compareTo = function(otherCard) {
 	return this.sprite == otherCard.sprite;
 }
 
+/**
+ * Dibuja el sprite de una carta en función de su estado.
+ * @param {CustomGraphicServer} gs Graphic server encargado de dibujar la carta
+ * @param {int} pos Posición que ocupa la carta en el tablero (0-15)
+ */
 MemoryGameCard.prototype.draw = function (gs, pos){
 	if (this.state == 'down') gs.draw('back', pos);
 	else gs.draw(this.sprite, pos);
